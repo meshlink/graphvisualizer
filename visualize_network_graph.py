@@ -103,7 +103,6 @@ except:
 import networkx as nx
 import random
 import sys
-import getopt
 import json
 import pickle
 
@@ -180,7 +179,7 @@ def build_objects_from_data(data, device_class_dict):
         'edges': edges,
     }
 
-def main(infile, outfile, position_file=None):
+def main(infile, outfile, position_file=None, bounce=False, prefer_lower_weight_edge=True):
     # not using input right now, just hard-coded to known classes
     device_classes = {
         0: DeviceClass('backbone', 1, 'g'),
@@ -200,7 +199,7 @@ def main(infile, outfile, position_file=None):
 
     # add edges to graph and assign them to a device class based on endpoints
     for e in data['edges'].values():
-        edge_cls = e.from_node.devclass
+        edge_cls = e.to_node.devclass
         edge_weight = edge_cls.weight
         edge_cls.edges.append(e)
         G.add_edge(e.from_node.name, e.to_node.name, weight=edge_weight)
@@ -209,7 +208,10 @@ def main(infile, outfile, position_file=None):
     try:
         with open(position_file, 'r') as fp:
             keep = pickle.load(fp)
-            fixed = keep.keys()
+            if bounce:
+                fixed = keep.keys()
+            else:
+                fixed = None
     except:
         keep = None
         fixed = None
@@ -228,17 +230,23 @@ def main(infile, outfile, position_file=None):
 
     # draw edges
     edge_size_offset = max(device_classes.values(), key=lambda x: x.weight).weight + 1
-    for cls in device_classes.values():
+    sorted_devclasses = device_classes.values()
+    sorted_devclasses.sort(key=lambda x:x.weight, reverse=prefer_lower_weight_edge)
+    for cls in sorted_devclasses:
         edgelist = [(e.from_node.name, e.to_node.name) for e in cls.edges]
-        #nx.draw_networkx_edges(G, pos, edgelist=edgelist, width=(edge_size_offset - cls.weight), alpha=1, edge_color=cls.color)
         nx.draw_networkx_edges(G, pos, edgelist=edgelist, alpha=1, edge_color=cls.color)
 
+    """
     # get undirected graph to build spanning tree and correct the edge weights
     G_undirected = G.to_undirected(reciprocal=True)
     for u, v, d in G_undirected.edges(data=True):
         u_node = data['nodes'][u]
         v_node = data['nodes'][v]
-        d['weight'] = max(u_node.devclass.weight, v_node.devclass.weight)
+        if prefer_lower_weight_edge:
+            d['weight'] = min(u_node.devclass.weight, v_node.devclass.weight)
+        else:
+            d['weight'] = max(u_node.devclass.weight, v_node.devclass.weight)
+
 
     # get MST
     ST = nx.algorithms.mst.minimum_spanning_tree(G_undirected)
@@ -250,7 +258,7 @@ def main(infile, outfile, position_file=None):
 
     # draw spanning tree edges
     nx.draw_networkx_edges(G, pos, edgelist=st_edges, alpha=0.3, edge_color='black', style='dashed')
-
+    """
     nx.draw_networkx_labels(G, pos, font_size=8, font_family='sans-serif')
 
     plt.axis('off')
@@ -272,5 +280,5 @@ if __name__ == "__main__":
         outfile = sys.argv[2]
         position_file = sys.argv[3] if len(sys.argv) > 3 else None
     
-    main(infile, outfile, position_file)
+    main(infile, outfile, position_file, bounce=True, prefer_lower_weight_edge=True)
 
