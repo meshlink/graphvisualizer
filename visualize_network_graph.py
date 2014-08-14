@@ -239,6 +239,7 @@ def main(infile, outfile, position_file=None, bounce=False, prefer_lower_weight_
     # get undirected graph to build spanning tree and correct the edge weights
     G_undirected = G.to_undirected(reciprocal=True)
     for u, v, d in G_undirected.edges(data=True):
+        # TODO this needs to be fixed to use the edge weight no the devclass weight
         u_node = data['nodes'][u]
         v_node = data['nodes'][v]
         if prefer_lower_weight_edge:
@@ -259,6 +260,11 @@ def main(infile, outfile, position_file=None, bounce=False, prefer_lower_weight_
     nx.draw_networkx_edges(G, pos, edgelist=st_edges, alpha=0.3, edge_color='black', style='dashed')
     """
     nx.draw_networkx_labels(G, pos, font_size=8, font_family='sans-serif')
+    edge_labels = dict()
+    for e in data['edges'].values():
+        edge_labels[(e.from_node.name, e.to_node.name)] = str(e.weight)
+    # label_pos: 0=head, 0.5=middle, 1=tail
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, label_pos=0.25, font_size=8, font_family='sans-serif')
 
     plt.axis('off')
     plt.savefig(outfile) # save as png

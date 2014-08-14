@@ -20,6 +20,24 @@ To run a batch of JSON files, you might do this:
 
 ```ls *.json | sed s/\.[^\.]*$// | xargs -n 1 -P 1 -I{} python visualize_network_graph.py {}.json {}.png positions```
 
+# Reading Output
+
+The nodes are coloured by their class:
+
+* backbone: green
+* stationary: yellow
+* portable: red
+* unknown: blue
+
+The edges are directed. The rectangular blocks are the arrowheads.
+
+The edges are coloured according to the class of the node they go *to*.
+
+Lower weight edges are drawn over top of higher weight edges by default.
+
+Edges are labelled with their weight. The weight is at the end of the edge
+with the arrowhead.
+
 # Input Data
 Input data must be in JSON format. The expected structure is, by example, as
 follows:
