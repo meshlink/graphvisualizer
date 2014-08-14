@@ -101,10 +101,10 @@ except:
     raise
 
 import networkx as nx
-import random
 import sys
 import json
 import pickle
+import math
 
 
 class DeviceClass(object):
@@ -215,7 +215,10 @@ def main(infile, outfile, position_file=None, bounce=False, prefer_lower_weight_
         keep = None
         fixed = None
 
-    pos = nx.spring_layout(G, pos=keep, fixed=fixed)
+    # distance the nodes should be positioned apart; default is 1/sqrt(n)
+    n = len(data['nodes'].keys())
+    k = n/math.sqrt(n)
+    pos = nx.spring_layout(G, k=k, pos=keep, fixed=fixed)
 
     # write node positions if possible
     if position_file:
