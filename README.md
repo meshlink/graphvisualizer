@@ -14,9 +14,16 @@ Output file name extension determines file type.
 Position file is optional. Used to cache node locations between runs of the
 tool, so that nodes don't jump around.
 
+## Batches
+
+To run a batch of JSON files, you might do this:
+
+```ls *.json | sed s/\.[^\.]*$// | xargs -n 1 -P 1 -I{} python visualize_network_graph.py {}.json {}.png positions```
+
 # Input Data
 Input data must be in JSON format. The expected structure is, by example, as
 follows:
+
 
 ```
 {
