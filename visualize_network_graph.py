@@ -200,18 +200,17 @@ def main(infile, outfile, position_file=None, bounce=False, prefer_lower_weight_
     # add edges to graph and assign them to a device class based on endpoints
     for e in data['edges'].values():
         edge_cls = e.to_node.devclass
-        edge_weight = edge_cls.weight
         edge_cls.edges.append(e)
-        G.add_edge(e.from_node.name, e.to_node.name, weight=edge_weight)
+        G.add_edge(e.from_node.name, e.to_node.name, weight=e.weight)
 
     # load existing node positions if possible
     try:
         with open(position_file, 'r') as fp:
             keep = pickle.load(fp)
             if bounce:
-                fixed = keep.keys()
-            else:
                 fixed = None
+            else:
+                fixed = keep.keys()
     except:
         keep = None
         fixed = None
