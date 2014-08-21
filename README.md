@@ -132,7 +132,7 @@ follows:
 
 # Requiremtnts
 
-Requires matplotlib and networkx.
+Requires matplotlib and networkx>=1.9.
 
 It's best to install matplotlib through ```apt-get install python-matplotlib```
 as it depends on numpy, scipy, and some other packages that are hard to build.
